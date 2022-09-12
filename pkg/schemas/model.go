@@ -32,7 +32,7 @@ type Schema struct {
 	*ObjectAsType
 	ID          string      `json:"$id"` // RFC draft-wright-json-schema-01, section-9.2
 	LegacyID    string      `json:"id"`  // RFC draft-wright-json-schema-00, section 4.5
-	Definitions Definitions `json:"definitions,omitempty"`
+	Definitions Definitions `json:"$defs,omitempty"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler for Schema struct
@@ -45,6 +45,17 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 	// fall back to id if $id is not present
 	if unmarshSchema.ID == "" {
 		unmarshSchema.ID = unmarshSchema.LegacyID
+	}
+
+	// take care of legacy fields
+	var legacySchema struct {
+		Definitions Definitions `json:"definitions,omitempty"`
+	}
+	if err := json.Unmarshal(data, &legacySchema); err != nil {
+		return err
+	}
+	if unmarshSchema.Definitions == nil && legacySchema.Definitions != nil {
+		unmarshSchema.Definitions = legacySchema.Definitions
 	}
 
 	*s = Schema(unmarshSchema)
@@ -111,14 +122,12 @@ type Type struct {
 	Properties           map[string]*Type `json:"properties,omitempty"`           // section 5.16
 	PatternProperties    map[string]*Type `json:"patternProperties,omitempty"`    // section 5.17
 	AdditionalProperties *Type            `json:"additionalProperties,omitempty"` // section 5.18
-	Dependencies         map[string]*Type `json:"dependencies,omitempty"`         // section 5.19
 	Enum                 []interface{}    `json:"enum,omitempty"`                 // section 5.20
 	Type                 TypeList         `json:"type,omitempty"`                 // section 5.21
 	AllOf                []*Type          `json:"allOf,omitempty"`                // section 5.22
 	AnyOf                []*Type          `json:"anyOf,omitempty"`                // section 5.23
 	OneOf                []*Type          `json:"oneOf,omitempty"`                // section 5.24
 	Not                  *Type            `json:"not,omitempty"`                  // section 5.25
-	Definitions          Definitions      `json:"definitions,omitempty"`          // section 5.26
 	// RFC draft-wright-json-schema-validation-00, section 6, 7
 	Title       string      `json:"title,omitempty"`       // section 6.1
 	Description string      `json:"description,omitempty"` // section 6.1
@@ -127,6 +136,11 @@ type Type struct {
 	// RFC draft-wright-json-schema-hyperschema-00, section 4
 	Media          *Type  `json:"media,omitempty"`          // section 4.3
 	BinaryEncoding string `json:"binaryEncoding,omitempty"` // section 4.3
+	// RFC draft-handrews-json-schema-validation-02, section 6
+	DependentRequired map[string][]string `json:"dependentRequired,omitempty"` // section 6.5.4
+	// RFC draft-handrews-json-schema-validation-02, appendix A
+	Definitions      Definitions      `json:"$defs,omitempty"`
+	DependentSchemas map[string]*Type `json:"dependentSchemas,omitempty"`
 
 	// ExtGoCustomType is the name of a (qualified or not) custom Go type
 	// to use for the field.
@@ -149,6 +163,22 @@ func (value *Type) UnmarshalJSON(raw []byte) error {
 	var obj ObjectAsType
 	if err := json.Unmarshal(raw, &obj); err != nil {
 		return err
+	}
+
+	// Take care of legacy fields from older RFC versions
+	legacyObj := struct {
+		// RFC draft-wright-json-schema-validation-00, section 5
+		Dependencies map[string]*Type `json:"dependencies,omitempty"`
+		Definitions  Definitions      `json:"definitions,omitempty"` // section 5.26
+	}{}
+	if err := json.Unmarshal(raw, &legacyObj); err != nil {
+		return err
+	}
+	if legacyObj.Definitions != nil && obj.Definitions == nil {
+		obj.Definitions = legacyObj.Definitions
+	}
+	if legacyObj.Dependencies != nil && obj.DependentSchemas == nil {
+		obj.DependentSchemas = legacyObj.Dependencies
 	}
 
 	*value = Type(obj)
