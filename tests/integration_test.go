@@ -18,6 +18,7 @@ var basicConfig = generator.Config{
 	DefaultPackageName: "github.com/example/test",
 	DefaultOutputName:  "-",
 	ResolveExtensions:  []string{".json", ".yaml"},
+	YAMLExtensions:     []string{".yaml", ".yml"},
 	Warner: func(message string) {
 		log.Printf("[from warner] %s", message)
 	},
@@ -79,6 +80,11 @@ func TestBooleanAsSchema(t *testing.T) {
 	testExampleFile(t, cfg, "./data/misc/boolean-as-schema.json")
 }
 
+func TestYamlStructNameFromFile(t *testing.T) {
+	cfg := basicConfig
+	testExampleFile(t, cfg, "./data/yaml/yamlStructNameFromFile.yaml")
+}
+
 func testExamples(t *testing.T, cfg generator.Config, dataDir string) {
 	fileInfos, err := ioutil.ReadDir(dataDir)
 	if err != nil {
@@ -114,7 +120,7 @@ func testExampleFile(t *testing.T, cfg generator.Config, fileName string) {
 
 		for outputName, source := range generator.Sources() {
 			if outputName == "-" {
-				outputName = strings.TrimSuffix(filepath.Base(fileName), ".json") + ".go"
+				outputName = strings.TrimSuffix(filepath.Base(fileName), filepath.Ext(fileName)) + ".go"
 			}
 			outputName += ".output"
 
