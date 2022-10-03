@@ -25,6 +25,7 @@ var (
 	_ validator = new(nullTypeValidator)
 	_ validator = new(defaultValidator)
 	_ validator = new(arrayValidator)
+	_ validator = new(minMaxValidator)
 )
 
 type requiredValidator struct {
@@ -84,6 +85,39 @@ func (v *nullTypeValidator) generate(out *codegen.Emitter) {
 }
 
 func (v *nullTypeValidator) desc() *validatorDesc {
+	return &validatorDesc{
+		hasError:            true,
+		beforeJSONUnmarshal: false,
+	}
+}
+
+type minMaxValidator struct {
+	jsonName  string
+	fieldName string
+	value     float64
+	operator  string
+	exclusive bool
+	pointer   bool
+}
+
+func (v *minMaxValidator) generate(out *codegen.Emitter) {
+	fieldName := fmt.Sprintf("%s.%s", varNamePlainStruct, v.fieldName)
+	op := v.operator
+	if v.exclusive {
+		op += "="
+	}
+	out.Print(`if `)
+	if v.pointer {
+		out.Print(`%s != nil && *`, fieldName)
+	}
+	out.Println(`%s %s %v {`, fieldName, op, v.value)
+	out.Indent(1)
+	out.Println(`return fmt.Errorf("field %s: must not be %s %v")`, v.jsonName, op, v.value)
+	out.Indent(-1)
+	out.Println(`}`)
+}
+
+func (v *minMaxValidator) desc() *validatorDesc {
 	return &validatorDesc{
 		hasError:            true,
 		beforeJSONUnmarshal: false,

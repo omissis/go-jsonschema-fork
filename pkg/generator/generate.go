@@ -420,6 +420,29 @@ func (g *schemaGenerator) generateReferencedType(ref string) (codegen.Type, erro
 }
 
 func (g *schemaGenerator) generatePrimitiveValidators(pt string, f codegen.StructField, pointer bool, validators *[]validator) {
+	switch pt {
+	case "float64", "int":
+		if f.SchemaType.Maximum != nil {
+			*validators = append(*validators, &minMaxValidator{
+				jsonName:  f.JSONName,
+				fieldName: f.Name,
+				value:     *f.SchemaType.Maximum,
+				operator:  ">",
+				exclusive: f.SchemaType.ExclusiveMaximum,
+				pointer:   pointer,
+			})
+		}
+		if f.SchemaType.Minimum != nil {
+			*validators = append(*validators, &minMaxValidator{
+				jsonName:  f.JSONName,
+				fieldName: f.Name,
+				value:     *f.SchemaType.Minimum,
+				operator:  "<",
+				exclusive: f.SchemaType.ExclusiveMinimum,
+				pointer:   pointer,
+			})
+		}
+	}
 }
 
 func (g *schemaGenerator) generateDeclaredType(

@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://example.com/enum",
+  "type": "object",
+  "required": [
+    "maxInt",
+    "maxInt0Excl",
+    "maxNum",
+    "maxNum0",
+    "minInt",
+    "minInt0Excl",
+    "minNum",
+    "minNum0",
+    "minMaxInt",
+    "maxStringIgnored",
+    "maxBoolIgnored",
+    "minStringIgnored",
+    "minBoolIgnored"
+  ],
+  "properties": {
+    "maxInt": {
+      "type": "integer",
+      "maximum": 42
+    },
+    "maxInt0Excl": {
+      "type": "integer",
+      "maximum": 0,
+      "exclusiveMaximum": true
+    },
+    "maxIntOpt": {
+      "type": "integer",
+      "maximum": 0
+    },
+    "maxNum": {
+      "type": "number",
+      "maximum": -42.0
+    },
+    "maxNum0": {
+      "type": "number",
+      "maximum": 0.0
+    },
+    "maxNum0OptExcl": {
+      "type": "number",
+      "maximum": 0.0,
+      "exclusiveMaximum": true
+    },
+    "minInt": {
+      "type": "integer",
+      "minimum": 3
+    },
+    "minInt0Excl": {
+      "type": "integer",
+      "minimum": 1024,
+      "exclusiveMinimum": true
+    },
+    "minIntOpt": {
+      "type": "integer",
+      "minimum": -42
+    },
+    "minNum": {
+      "type": "number",
+      "minimum": -42.0
+    },
+    "minNum0": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "minNum0OptExcl": {
+      "type": "number",
+      "minimum": 0.0,
+      "exclusiveMinimum": true
+    },
+    "minMaxInt": {
+      "type": "integer",
+      "minimum": 3,
+      "maximum": 10
+    },
+    "maxStringIgnored": {
+      "type": "string",
+      "maximum": 100
+    },
+    "maxBoolIgnored": {
+      "type": "boolean",
+      "maximum": -273
+    },
+    "minStringIgnored": {
+      "type": "string",
+      "maximum": 1
+    },
+    "minBoolIgnored": {
+      "type": "boolean",
+      "maximum": -1
+    }
+  }
+}

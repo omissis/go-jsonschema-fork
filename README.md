@@ -85,10 +85,10 @@ While not finished, go-jsonschema can be used today. Aside from some minor featu
     - [ ] `const`
   - [ ] Numeric validation (§6.2)
     - [ ] `multipleOf`
-    - [ ] `maximum`
-    - [ ] `exclusiveMaximum`
-    - [ ] `minimum`
-    - [ ] `exclusiveMinimum`
+    - [x] `maximum`
+    - [x] `exclusiveMaximum`
+    - [x] `minimum`
+    - [x] `exclusiveMinimum`
   - [ ] String validation (§6.3)
     - [ ] `maxLength`
     - [ ] `minLength`
